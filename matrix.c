@@ -19,11 +19,10 @@ cl_device_id GetDevice(cl_context context);
 
 void DisplayMatrix(const char *name, const f32_t *values, size_t size) {
     size_t stride = (size_t)sqrt((double)size);
-    fprintf(stdout, "Matrix: %s ", name);
-    fprintf(stdout, "[\n");
+    fprintf(stdout, "Matrix: %s [\n", name);
     for (size_t index = 0; index < size; index += stride) {
         for (size_t inner = 0; inner < stride; inner++)
-            fprintf(stdout, " %f ", values[index + inner]);
+            fprintf(stdout, " %02.f ", values[index + inner]);
         fprintf(stdout, "\n");
     }
     fprintf(stdout, "]\n");
@@ -32,12 +31,24 @@ void DisplayMatrix(const char *name, const f32_t *values, size_t size) {
 int main() {
     cl_platform_id platform;
     clGetPlatformIDs(1, &platform, NULL);
+    if (!platform)
+        return -1;
 
     cl_device_id device;
     cl_uint count;
     clGetDeviceIDs(platform, CL_DEVICE_TYPE_GPU, 1, &device, &count);
 
+    printf("Total number of GPUs: %u\n", count);
+    if (!count)
+        quit("No device found");
     cl_context context = clCreateContext(NULL, 1, &device, NULL, 0, NULL);
+
+    size_t br = 256;
+    char* brand = malloc(br);
+    clGetDeviceInfo(GetDevice(context), CL_DEVICE_NAME, 0, NULL, &br);
+    clGetDeviceInfo(GetDevice(context), CL_DEVICE_NAME, br, brand, NULL);
+    printf("Brand: %ld:%s\n", br, brand);
+    free(brand);
 
     f32_t *floats = malloc(1024 * sizeof(f32_t));
 
@@ -51,8 +62,8 @@ int main() {
 
     assert(total % 3 == 0);
     const f32_t *first = floats;
-    const f32_t *second = &floats[sizeof(float) * (total / 3)];
-    f32_t *result = &floats[sizeof(f32_t) * (i32_t)(total / 1.5)];
+    const f32_t *second = &floats[total / 3];
+    f32_t *result = &floats[(size_t)(total / 1.5)];
 
     f32_t *test = calloc(1, second - first);
 
@@ -81,19 +92,19 @@ int main() {
     size_t locals[2] = {total / 3, total / 3};
 
     size_t globals[2] = {total, total};
-    error = clEnqueueNDRangeKernel(queue, kernel, 1, NULL, globals, locals, 0, NULL, NULL);
+    error = clEnqueueNDRangeKernel(queue, kernel, 2, NULL, globals, locals, 0, NULL, NULL);
 
     clFinish(queue);
     clEnqueueReadBuffer(queue, matrix[2], CL_TRUE, 0, size, test, 0, NULL, NULL);
 
     if (memcmp(test, result, size) != 0)
-        fprintf(stderr, "Failed to multiply matrices");
+        fprintf(stderr, "Failed to multiply matrices\n");
 
-    DisplayMatrix("First", first, size / 3);
-    DisplayMatrix("Second", second, size / 3);
-    DisplayMatrix("Result", result, size / 3);
+    DisplayMatrix("First", first, total / 3);
+    DisplayMatrix("Second", second, total / 3);
+    DisplayMatrix("Result", result, total / 3);
 
-    DisplayMatrix("OpenCL result", test, size);
+    DisplayMatrix("OpenCL result", test, total / 3);
     free(floats);
 
 

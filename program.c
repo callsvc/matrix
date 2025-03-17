@@ -1,6 +1,8 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <sys/stat.h>
 
+#define CL_TARGET_OPENCL_VERSION 200
 #include <CL/opencl.h>
 
 void quit(const char*);
@@ -20,7 +22,7 @@ cl_program BuildProgram(cl_context context) {
         quit("kernel.cl not found");
     fstat(fileno(source), &attrib);
     char modified[100];
-    snprintf(modified, sizeof(modified), "%lld_kernel.bin", attrib.st_mtime);
+    snprintf(modified, sizeof(modified), "%ld_kernel.bin", attrib.st_mtime);
     FILE *binary = fopen(modified, "r");
 
     size_t count, fmt;

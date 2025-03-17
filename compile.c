@@ -1,5 +1,6 @@
 #include <assert.h>
 #include <stdlib.h>
+#define CL_TARGET_OPENCL_VERSION 200
 #include <CL/opencl.h>
 
 void quit(const char*);

@@ -8,6 +8,8 @@ typedef float f32_t;
 typedef int i32_t;
 typedef unsigned char u8_t;
 
+void quit(const char*);
+
 void* GetAllFileContent(FILE* file, size_t *size) {
     size_t local;
     if (size == NULL)
@@ -34,5 +36,7 @@ void ReadMatrixFile(f32_t *out, FILE *file, i32_t *count) {
         for (const char *tok = strtok(line, ";"); tok && *tok; tok = strtok(NULL, ";\n"))
             if ((*out++ = strtof(trim(tok), NULL)) >= 0)
                 (*count)++;
+	if (*count >= 1024)
+	    quit("Out of bounds");
     }
 }

@@ -1,9 +1,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#define CL_TARGET_OPENCL_VERSION 200
 #include <CL/opencl.h>
 void quit(const char *fmt) {
-    fprintf(stderr, fmt);
+    fprintf(stderr, "%s\n", fmt);
     exit(-1);
 }
 

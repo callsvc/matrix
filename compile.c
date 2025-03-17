@@ -1,10 +1,11 @@
 #include <assert.h>
+#include <stdlib.h>
 #include <CL/opencl.h>
 
 void quit(const char*);
 cl_device_id GetDevice(cl_context context);
 
-cl_program CompileProgram(cl_context context, const char* lines, size_t size) {
+cl_program CompileProgram(cl_context context, const char *lines, size_t size) {
     cl_int error;
     cl_program result = clCreateProgramWithSource(context, 1, &lines, &size, &error);
     assert(error == CL_SUCCESS);

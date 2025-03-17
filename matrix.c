@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <string.h>
+#include <math.h>
 
 #define CL_TARGET_OPENCL_VERSION 200
 #include <CL/opencl.h>
@@ -15,6 +16,18 @@ void ReadMatrixFile(f32_t *out, FILE *file, i32_t *count);
 
 cl_program BuildProgram(cl_context context);
 cl_device_id GetDevice(cl_context context);
+
+void DisplayMatrix(const char *name, const f32_t *values, size_t size) {
+    size_t stride = (size_t)sqrt((double)size);
+    fprintf(stdout, "Matrix: %s ", name);
+    fprintf(stdout, "[\n");
+    for (size_t index = 0; index < size; index += stride) {
+        for (size_t inner = 0; inner < stride; inner++)
+            fprintf(stdout, " %f ", values[index + inner]);
+        fprintf(stdout, "\n");
+    }
+    fprintf(stdout, "]\n");
+}
 
 int main() {
     cl_platform_id platform;
@@ -74,13 +87,15 @@ int main() {
     clEnqueueReadBuffer(queue, matrix[2], CL_TRUE, 0, size, test, 0, NULL, NULL);
 
     if (memcmp(test, result, size) != 0)
-        fprintf(stderr, "Vector multiplication failed");
+        fprintf(stderr, "Failed to multiply matrices");
 
-    for (i32_t index = 0; index < size; index++)
-        fprintf(stdout, "%f ", test[index]);
-    fprintf(stdout, "\n");
+    DisplayMatrix("First", first, size / 3);
+    DisplayMatrix("Second", second, size / 3);
+    DisplayMatrix("Result", result, size / 3);
 
+    DisplayMatrix("OpenCL result", test, size);
     free(floats);
+
 
     for (i32_t mat = 0; mat < 3; mat++)
         clReleaseMemObject(matrix[mat]);

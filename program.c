@@ -9,7 +9,7 @@ typedef float f32_t;
 typedef int i32_t;
 typedef unsigned char u8_t;
 
-cl_program CompileProgram(cl_context context, const char* lines, size_t size);
+cl_program CompileProgram(cl_context context, const char *lines, size_t size);
 void* GetAllFileContent(FILE* file, size_t *size);
 cl_device_id GetDevice(cl_context context);
 
